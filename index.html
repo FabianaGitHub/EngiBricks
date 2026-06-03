@@ -857,9 +857,36 @@ async function addTask() {
 async function toggleTask(id) {
   const task = state.tarefas.find(t=>t.id===id);
   if (!task) return;
-  task.done = !task.done;
-  await updateDoc(doc(db,'users',state.uid,'tarefas',id), {done:task.done});
-  if (task.done) await addXP(20, `✅ +20 XP! "${task.titulo.substring(0,20)}..." concluída!`);
+
+  if (task.done) {
+    // Desmarcar: apenas remove o check, sem mexer no XP
+    task.done = false;
+    await updateDoc(doc(db,'users',state.uid,'tarefas',id), {done: false});
+    renderTasks(); renderHome(); updateFocusSelect();
+    return;
+  }
+
+  // Marcar como concluída: exige ao menos 1 sessão Pomodoro nessa tarefa
+  const tempoFoco = task.tempoFoco || 0;
+  if (tempoFoco === 0) {
+    const ok = confirm(`⚠️ Você ainda não usou o Pomodoro nesta tarefa.\n\nSelecione esta tarefa no Foco e complete ao menos 1 sessão antes de concluir.\n\nDeseja marcar como concluída mesmo assim?`);
+    if (!ok) return;
+  }
+
+  task.done = true;
+  const updates = {done: true};
+
+  // XP só na primeira conclusão (evita farm de pontos)
+  if (!task.xpGanho) {
+    task.xpGanho = true;
+    updates.xpGanho = true;
+    await updateDoc(doc(db,'users',state.uid,'tarefas',id), updates);
+    await addXP(20, `✅ +20 XP! "${task.titulo.substring(0,20)}..." concluída!`);
+  } else {
+    await updateDoc(doc(db,'users',state.uid,'tarefas',id), updates);
+    showToast('✅ Tarefa concluída!');
+  }
+
   await checkConquistas();
   renderTasks(); renderHome(); updateFocusSelect();
 }
@@ -884,6 +911,7 @@ function renderTasks() {
           <span class="badge badge-${t.prio.toLowerCase()}">${t.prio==='Alta'?'🔴 Alta':t.prio==='Média'?'🟡 Média':'🟢 Baixa'}</span>
           <span class="badge badge-mat">${t.materia}</span>
           <span class="badge badge-tempo">⏱ ${t.tempo}</span>
+          ${t.tempoFoco>0 ? `<span class="badge" style="background:#D1FAE5;color:#059669;">🎯 ${t.tempoFoco}min focado</span>` : ''}
         </div>
       </div>
     </div>`).join('');
@@ -932,6 +960,17 @@ async function onTimerComplete() {
     sessionsToday++; sessionXPToday+=15; state.sessoesTotais++;
     document.getElementById('sess-count').textContent = sessionsToday;
     document.getElementById('sess-xp').textContent = sessionXPToday;
+
+    // Registra 25 min de foco na tarefa selecionada
+    const selId = document.getElementById('focus-task-select').value;
+    if (selId) {
+      const task = state.tarefas.find(t=>t.id===selId);
+      if (task) {
+        task.tempoFoco = (task.tempoFoco||0) + 25;
+        await updateDoc(doc(db,'users',state.uid,'tarefas',selId), {tempoFoco: task.tempoFoco});
+      }
+    }
+
     await addXP(15,'🏆 Sessão concluída! +15 XP');
     await checkConquistas();
     setMode('break');
