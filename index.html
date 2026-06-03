@@ -28,7 +28,7 @@
 
     /* ── PHONE SHELL ── */
     #phone-shell {
-      width: 100%; max-width: 430px; height: 100vh; max-height: 932px;
+      width: 100%; max-width: 430px; height: 100vh; height: 100dvh; max-height: 932px;
       margin: 0 auto; background: var(--bg); position: relative;
       display: flex; flex-direction: column; overflow: hidden;
       border-radius: 0; box-shadow: none;
@@ -88,11 +88,12 @@
     .lgpd-text { font-size: 11px; color: var(--gray); text-align: center; font-family: 'Nunito Sans', sans-serif; max-width: 280px; line-height: 1.5; }
 
     /* ── APP CONTAINER ── */
-    #app-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    #app-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
     #app-container.hidden { display: none; }
 
     /* ── SCREENS ── */
-    .screen { flex: 1; overflow-y: auto; display: none; flex-direction: column; padding-bottom: 80px; }
+    .screen { flex: 1; overflow-y: auto; display: none; flex-direction: column; }
+    #screen-ai { overflow: hidden; }
     .screen.active { display: flex; }
     .screen-inner { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 16px; }
 
@@ -216,7 +217,7 @@
     .ai-subtab.active { color: var(--primary); border-bottom-color: var(--primary); }
     #ai-panel-chat, #ai-panel-recursos { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
     #ai-panel-chat.active, #ai-panel-recursos.active { display: flex; }
-    #screen-ai { padding-bottom: 72px; }
+    
 
     /* ── CHAT ── */
     #chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
@@ -301,7 +302,7 @@
     .admin-loading { padding: 24px; text-align: center; color: var(--gray); font-family: 'Nunito Sans', sans-serif; font-size: 14px; }
 
     /* ── BOTTOM NAV ── */
-    #bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 1.5px solid #F3F4F6; display: flex; z-index: 100; height: 72px; }
+    #bottom-nav { background: var(--white); border-top: 1.5px solid #F3F4F6; display: flex; z-index: 100; height: 72px; flex-shrink: 0; }
     .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: all 0.2s; border: none; background: none; padding: 8px 0; }
     .nav-icon { font-size: 20px; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
     .nav-label { font-size: 10px; font-weight: 700; color: var(--gray); transition: color 0.2s; font-family: 'Nunito', sans-serif; }
